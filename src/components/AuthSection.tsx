@@ -3,13 +3,9 @@ import { SupabaseClient } from "@supabase/supabase-js";
 
 interface AuthSectionProps {
   supabaseClient: SupabaseClient;
-  setAuthStatus: (status: string, user?: any) => void;
 }
 
-const AuthSection: React.FC<AuthSectionProps> = ({
-  supabaseClient,
-  setAuthStatus,
-}) => {
+const AuthSection: React.FC<AuthSectionProps> = ({ supabaseClient }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -23,7 +19,6 @@ const AuthSection: React.FC<AuthSectionProps> = ({
       });
       console.log(response);
       if (response.error) throw response.error;
-      setAuthStatus("Authenticated", response.user);
       setStatus("Authenticated");
       setError("");
     } catch (err: any) {
@@ -37,7 +32,6 @@ const AuthSection: React.FC<AuthSectionProps> = ({
       const response = await supabaseClient.auth.signUp({ email, password });
       console.log(response);
       if (response.error) throw response.error;
-      setAuthStatus("Authenticated", response.user);
       setStatus("Authenticated");
       setError("");
     } catch (err: any) {

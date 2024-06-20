@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { SupabaseClient, createClient } from "@supabase/supabase-js";
+import { SupabaseClient } from "@supabase/supabase-js";
 import ConnectionForm from "./components/ConnectionForm";
 import QuerySection from "./components/QuerySection";
 import QueryResults from "./components/QueryResults";
@@ -12,8 +12,6 @@ const App: React.FC = () => {
   );
   const [queryResults, setQueryResults] = useState<string[]>([]);
   const [tables, setTables] = useState<string[]>([]);
-  const [authStatus, setAuthStatus] = useState("Not Authenticated");
-  const [user, setUser] = useState<any>(null);
 
   const addQueryResult = (result: string) => {
     setQueryResults((prevResults) => [...prevResults, result]);
@@ -22,11 +20,6 @@ const App: React.FC = () => {
   const discoverTables = async (url: string, key: string) => {
     const tableNames = await getPaths(url, key);
     setTables(tableNames);
-  };
-
-  const handleAuthStatus = (status: string, user?: any) => {
-    setAuthStatus(status);
-    setUser(user);
   };
 
   return (
@@ -44,10 +37,7 @@ const App: React.FC = () => {
               addQueryResult={addQueryResult}
               tables={tables}
             />
-            <AuthSection
-              supabaseClient={supabaseClient}
-              setAuthStatus={handleAuthStatus}
-            />
+            <AuthSection supabaseClient={supabaseClient} />
           </div>
           <QueryResults queryResults={queryResults} />
         </div>
