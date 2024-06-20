@@ -1,30 +1,13 @@
-# React + TypeScript + Vite
+# SupaPwn Tool
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+SupaPwn is a React application designed to make it easy to test your Supabase security. This application allows you to connect to a Supabase database, discover tables, and perform queries on the database.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Connect to Supabase:** Enter your Supabase URL and API key to connect.
+- **Discover Tables:** Automatically discover and list all tables in your Supabase database.
+- **Query Supabase:** Perform queries on the tables and view the results.
 
-## Expanding the ESLint configuration
+# Contributing
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
-```
-
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+Feel free to submit PRs or open issues for any improvements or bugs you find.
