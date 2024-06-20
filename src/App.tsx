@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SupabaseClient } from "@supabase/supabase-js";
 import ConnectionForm from "./components/ConnectionForm";
 import QuerySection from "./components/QuerySection";
@@ -10,6 +10,18 @@ const App: React.FC = () => {
   const [supabaseClient, setSupabaseClient] = useState<SupabaseClient | null>(
     null
   );
+
+  //set supabaseClient to window.supabase
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if (supabaseClient) {
+        window.supabase = supabaseClient;
+      } else {
+        window.supabase = null;
+      }
+    }
+  }, [supabaseClient]);
+
   const [queryResults, setQueryResults] = useState<string[]>([]);
   const [tables, setTables] = useState<string[]>([]);
 
