@@ -26,7 +26,7 @@ const App: React.FC = () => {
   const [tables, setTables] = useState<string[]>([]);
 
   const addQueryResult = (result: string) => {
-    setQueryResults((prevResults) => [...prevResults, result]);
+    setQueryResults((prevResults) => [result, ...prevResults]);
   };
 
   const discoverTables = async (url: string, key: string) => {

@@ -19,7 +19,7 @@ const QuerySection: React.FC<QuerySectionProps> = ({
     try {
       const { data, error } = await supabaseClient.from(table).select(query);
       if (error) throw error;
-      console.log(data);
+      console.log(table, data);
       addQueryResult(
         `Table: ${table}\nQuery: ${query}\nDate: ${date}\n\n${JSON.stringify(
           data,
@@ -27,12 +27,44 @@ const QuerySection: React.FC<QuerySectionProps> = ({
           2
         )}`
       );
+      return { table, data };
     } catch (err: any) {
-      console.log(err);
+      console.log(table, err);
       addQueryResult(
         `Table: ${table}\nQuery: ${query}\nDate: ${date}\n\nFailed to query: ${err.message}`
       );
+      return { table, error: err.message };
     }
+  };
+
+  const queryAllTables = async () => {
+    const summary: { table: string; empty: boolean; error?: string }[] = [];
+
+    for (const tableName of tables) {
+      const result = await querySupabase(tableName, "*");
+      if (result) {
+        summary.push({
+          table: result.table,
+          empty: result.data?.length === 0,
+          error: result.error,
+        });
+      }
+    }
+
+    const summaryReport = summary
+      .map(
+        (entry) =>
+          `Table: ${entry.table} - ${
+            entry.error
+              ? `Error: ${entry.error}`
+              : entry.empty
+              ? "Empty"
+              : "Non-Empty"
+          }`
+      )
+      .join("\n");
+
+    addQueryResult(`Summary Report:\n\n${summaryReport}`);
   };
 
   return (
@@ -48,12 +80,20 @@ const QuerySection: React.FC<QuerySectionProps> = ({
         value={table}
         onChange={(e) => setTable(e.target.value)}
       />
-      <button
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        onClick={() => querySupabase(table, "*")}
-      >
-        Query
-      </button>
+      <div className="flex space-x-4">
+        <button
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          onClick={() => querySupabase(table, "*")}
+        >
+          Query
+        </button>
+        <button
+          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+          onClick={queryAllTables}
+        >
+          Query All
+        </button>
+      </div>
       <div className="mt-4 w-full">
         {tables.length > 0 ? (
           <div>

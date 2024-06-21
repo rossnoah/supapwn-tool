@@ -40,6 +40,24 @@ const AuthSection: React.FC<AuthSectionProps> = ({ supabaseClient }) => {
     }
   };
 
+  const handleAutoRegister = async () => {
+    try {
+      const autoEmail = "test@test.com";
+      const autoPassword = "testtest";
+      const response = await supabaseClient.auth.signUp({
+        email: autoEmail,
+        password: autoPassword,
+      });
+      console.log(response);
+      if (response.error) throw response.error;
+      setStatus("Authenticated");
+      setError("");
+    } catch (err: any) {
+      setError(err.message);
+      setStatus("Not Authenticated");
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center my-4 space-y-6 bg-white p-8 rounded-lg shadow-lg">
       <h3 className="text-lg text-center text-gray-700">Authenticate</h3>
@@ -69,6 +87,12 @@ const AuthSection: React.FC<AuthSectionProps> = ({ supabaseClient }) => {
           onClick={handleRegister}
         >
           Register
+        </button>
+        <button
+          className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
+          onClick={handleAutoRegister}
+        >
+          Auto Register
         </button>
       </div>
       <p className="text-sm mt-2">
