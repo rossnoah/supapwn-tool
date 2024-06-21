@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { SupabaseClient } from "@supabase/supabase-js";
 import ConnectionForm from "./components/ConnectionForm";
 import QuerySection from "./components/QuerySection";
-import QueryResults from "./components/QueryResults";
+import QueryResults, { result } from "./components/QueryResults";
 import AuthSection from "./components/AuthSection";
 import { getPaths } from "./getPaths";
 
@@ -22,10 +22,14 @@ const App: React.FC = () => {
     }
   }, [supabaseClient]);
 
-  const [queryResults, setQueryResults] = useState<string[]>([]);
+  const [queryResults, setQueryResults] = useState<result[]>([]);
   const [tables, setTables] = useState<string[]>([]);
 
-  const addQueryResult = (result: string) => {
+  const addQueryResult = (data: string, bypassCharLimit?: boolean) => {
+    const result: result = {
+      data,
+      bypasscharlimit: bypassCharLimit,
+    };
     setQueryResults((prevResults) => [result, ...prevResults]);
   };
 

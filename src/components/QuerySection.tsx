@@ -3,7 +3,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 
 interface QuerySectionProps {
   supabaseClient: SupabaseClient;
-  addQueryResult: (result: string) => void;
+  addQueryResult: (data: string, bypassCharLimit?: boolean) => void;
   tables: string[];
 }
 
@@ -20,18 +20,21 @@ const QuerySection: React.FC<QuerySectionProps> = ({
       const { data, error } = await supabaseClient.from(table).select(query);
       if (error) throw error;
       console.log(table, data);
+
       addQueryResult(
         `Table: ${table}\nQuery: ${query}\nDate: ${date}\n\n${JSON.stringify(
           data,
           null,
           2
-        )}`
+        )}`,
+        false
       );
       return { table, data };
     } catch (err: any) {
       console.log(table, err);
       addQueryResult(
-        `Table: ${table}\nQuery: ${query}\nDate: ${date}\n\nFailed to query: ${err.message}`
+        `Table: ${table}\nQuery: ${query}\nDate: ${date}\n\nFailed to query: ${err.message}`,
+        false
       );
       return { table, error: err.message };
     }
@@ -60,7 +63,7 @@ const QuerySection: React.FC<QuerySectionProps> = ({
       )
       .join("\n");
 
-    addQueryResult(`Summary Report:\n\n${summaryReport}`);
+    addQueryResult(`Summary Report:\n\n${summaryReport}`, true);
   };
 
   return (
