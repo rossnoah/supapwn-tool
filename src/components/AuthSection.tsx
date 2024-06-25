@@ -40,19 +40,35 @@ const AuthSection: React.FC<AuthSectionProps> = ({ supabaseClient }) => {
     }
   };
 
-  const handleAutoRegister = async () => {
+  const handleAutoLoginOrRegister = async () => {
+    const autoEmail = "test@test.com";
+    const autoPassword = "testtest";
+
     try {
-      const autoEmail = "test@test.com";
-      const autoPassword = "testtest";
-      const response = await supabaseClient.auth.signUp({
+      // Try logging in first
+      const loginResponse = await supabaseClient.auth.signInWithPassword({
         email: autoEmail,
         password: autoPassword,
       });
-      console.log(response);
-      if (response.error) throw response.error;
+
+      if (loginResponse.error || !loginResponse.data.user) {
+        // If login fails, try registering
+        const registerResponse = await supabaseClient.auth.signUp({
+          email: autoEmail,
+          password: autoPassword,
+        });
+
+        if (registerResponse.error) throw registerResponse.error;
+        console.log(registerResponse);
+      } else {
+        console.log(loginResponse);
+      }
+
+      // If either login or registration succeeds
       setStatus("Authenticated");
       setError("");
     } catch (err: any) {
+      // If both login and registration fail
       setError(err.message);
       setStatus("Not Authenticated");
     }
@@ -90,7 +106,7 @@ const AuthSection: React.FC<AuthSectionProps> = ({ supabaseClient }) => {
         </button>
         <button
           className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
-          onClick={handleAutoRegister}
+          onClick={handleAutoLoginOrRegister}
         >
           Auto Register
         </button>
