@@ -16,6 +16,8 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({
   const [statusColor, setStatusColor] = useState("text-red-500");
   const [error, setError] = useState("");
   const [showForm, setShowForm] = useState(true);
+  const [url, setUrl] = useState("");
+  const [key, setKey] = useState("");
 
   const createSupabaseClient = async (url: string, key: string) => {
     try {
@@ -59,25 +61,21 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({
           <input
             type="text"
             placeholder="Url"
-            id="url"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
             className="w-full p-2 border border-gray-300 rounded"
           />
           <input
             type="text"
             placeholder="Key"
-            id="key"
+            value={key}
+            onChange={(e) => setKey(e.target.value)}
             className="w-full p-2 border border-gray-300 rounded"
           />
           <div className="flex items-center justify-between w-full">
             <button
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-              onClick={() => {
-                const url = (document.getElementById("url") as HTMLInputElement)
-                  .value;
-                const key = (document.getElementById("key") as HTMLInputElement)
-                  .value;
-                createSupabaseClient(url, key);
-              }}
+              onClick={() => createSupabaseClient(url, key)}
             >
               Connect
             </button>
