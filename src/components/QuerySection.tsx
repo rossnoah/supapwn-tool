@@ -43,16 +43,25 @@ const QuerySection: React.FC<QuerySectionProps> = ({
   const queryAllTables = async () => {
     const summary: { table: string; size: number; error?: string }[] = [];
 
-    for (const tableName of tables) {
+    const promises = tables.map(async (tableName) => {
       const result = await querySupabase(tableName, "*");
       if (result) {
-        summary.push({
+        return {
           table: result.table,
           size: result.data ? result.data.length : 0,
           error: result.error,
-        });
+        };
       }
-    }
+      return null;
+    });
+
+    const results = await Promise.all(promises);
+
+    results.forEach((entry) => {
+      if (entry) {
+        summary.push(entry);
+      }
+    });
 
     const summaryReport = summary
       .map(
