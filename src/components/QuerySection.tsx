@@ -13,22 +13,26 @@ const QuerySection: React.FC<QuerySectionProps> = ({
   tables,
 }) => {
   const [table, setTable] = useState("");
+  const [skipEmpty, setSkipEmpty] = useState(false);
 
   const querySupabase = async (table: string, query: string) => {
     const date = new Date().toLocaleString();
     try {
       const { data, error } = await supabaseClient.from(table).select(query);
       if (error) throw error;
-      console.log(table, data);
 
-      addQueryResult(
-        `Table: ${table}\nQuery: ${query}\nDate: ${date}\n\n${JSON.stringify(
-          data,
-          null,
-          2
-        )}`,
-        false
-      );
+      if (!skipEmpty || (data && data.length > 0)) {
+        console.log(table, data);
+
+        addQueryResult(
+          `Table: ${table}\nQuery: ${query}\nDate: ${date}\n\n${JSON.stringify(
+            data,
+            null,
+            2
+          )}`,
+          false
+        );
+      }
       return { table, data };
     } catch (err: any) {
       console.log(table, err);
@@ -42,26 +46,31 @@ const QuerySection: React.FC<QuerySectionProps> = ({
 
   const queryAllTables = async () => {
     const summary: { table: string; size: number; error?: string }[] = [];
+    const chunkSize = 100;
 
-    const promises = tables.map(async (tableName) => {
-      const result = await querySupabase(tableName, "*");
-      if (result) {
-        return {
-          table: result.table,
-          size: result.data ? result.data.length : 0,
-          error: result.error,
-        };
-      }
-      return null;
-    });
+    for (let i = 0; i < tables.length; i += chunkSize) {
+      const chunk = tables.slice(i, i + chunkSize);
 
-    const results = await Promise.all(promises);
+      const promises = chunk.map(async (tableName) => {
+        const result = await querySupabase(tableName, "*");
+        if (result) {
+          return {
+            table: result.table,
+            size: result.data ? result.data.length : 0,
+            error: result.error,
+          };
+        }
+        return null;
+      });
 
-    results.forEach((entry) => {
-      if (entry) {
-        summary.push(entry);
-      }
-    });
+      const results = await Promise.all(promises);
+
+      results.forEach((entry) => {
+        if (entry) {
+          summary.push(entry);
+        }
+      });
+    }
 
     const summaryReport = summary
       .map(
@@ -101,6 +110,14 @@ const QuerySection: React.FC<QuerySectionProps> = ({
         >
           Query All
         </button>
+      </div>
+      <div className="flex items-center space-x-2 mt-4">
+        <input
+          type="checkbox"
+          checked={skipEmpty}
+          onChange={(e) => setSkipEmpty(e.target.checked)}
+        />
+        <label className="text-gray-700">Skip Empty Collections</label>
       </div>
       <div className="mt-4 w-full">
         {tables.length > 0 ? (
