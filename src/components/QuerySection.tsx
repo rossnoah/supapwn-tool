@@ -128,7 +128,9 @@ const QuerySection: React.FC<QuerySectionProps> = ({
     const vulnerableTables = vulnerableTableNameList
       .map(
         (entry) =>
-          `${entry.table} (${entry.size > 1000 ? "1000+" : entry.size} entries)`
+          `${entry.table} (${
+            entry.size >= 1000 ? "1000+" : entry.size
+          } entries)`
       )
       .join(", ");
 
