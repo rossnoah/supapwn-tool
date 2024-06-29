@@ -5,7 +5,7 @@ import QuerySection from "./components/QuerySection";
 import QueryResults, { result } from "./components/QueryResults";
 import AuthSection from "./components/AuthSection";
 import { getPaths } from "./getPaths";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import VulnerabilityDisclosure from "./components/VulnerabilityDisclosure";
 import Settings from "./components/Settings";
 
@@ -59,8 +59,10 @@ const App: React.FC = () => {
   };
 
   const discoverTables = async (url: string, key: string) => {
+    const toastId = toast.loading("Discovering tables...");
     const tableNames = await getPaths(url, key);
     setTables(tableNames);
+    toast.success("Done discovering tables", { id: toastId });
   };
 
   return (

@@ -5,6 +5,7 @@ import {
   fetchTableData,
   processTablesInChunks,
 } from "../supabaseUtils";
+import toast from "react-hot-toast";
 
 interface QuerySectionProps {
   supabaseClient: SupabaseClient;
@@ -28,6 +29,7 @@ const QuerySection: React.FC<QuerySectionProps> = ({
   };
 
   const queryAllTables = async (query: string) => {
+    const toastId = toast.loading("Querying all tables...");
     console.log("Querying all tables...");
     const summary = await processTablesInChunks(tables, (table) =>
       fetchTableData(supabaseClient, table, query, skipEmpty)
@@ -45,6 +47,7 @@ const QuerySection: React.FC<QuerySectionProps> = ({
       .join("\n");
 
     addQueryResult(`Summary Report:\n\n${summaryReport}`, true);
+    toast.success("Query completed.", { id: toastId });
   };
 
   return (
