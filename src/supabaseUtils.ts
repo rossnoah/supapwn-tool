@@ -72,7 +72,6 @@ export const processTablesInChunks = async (
 
     results.forEach((entry) => {
       if (entry) {
-        logResult(entry);
         summary.push(entry);
       }
     });
