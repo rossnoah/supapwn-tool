@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { SupabaseClient } from "@supabase/supabase-js";
 import VulnerabilityDisclosure from "./VulnerabilityDisclosure";
+import {
+  handleResult,
+  fetchTableData,
+  processTablesInChunks,
+} from "../supabaseUtils";
 
 interface QuerySectionProps {
   supabaseClient: SupabaseClient;
@@ -17,15 +22,16 @@ const QuerySection: React.FC<QuerySectionProps> = ({
   const [skipEmpty, setSkipEmpty] = useState<boolean>(false);
   const [companyName, setCompanyName] = useState<string>("");
   const [companyUrl, setCompanyUrl] = useState<string>("");
-  const [disclosureCredits, setDisclosureCredits] = useState<string>("");
+  const [disclosureCredits, setDisclosureCredits] = useState<string>(
+    localStorage.getItem("disclosureCredits") || ""
+  );
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   useEffect(() => {
-    const savedDisclosureCredits = localStorage.getItem("disclosureCredits");
-    if (savedDisclosureCredits) {
-      setDisclosureCredits(savedDisclosureCredits);
-    }
+    localStorage.setItem("disclosureCredits", disclosureCredits);
+  }, [disclosureCredits]);
 
+  useEffect(() => {
     const checkAuthStatus = async () => {
       const user = (await supabaseClient.auth.getUser()).data.user;
       setIsAuthenticated(!!user);
@@ -34,104 +40,25 @@ const QuerySection: React.FC<QuerySectionProps> = ({
     checkAuthStatus();
   }, [supabaseClient.auth]);
 
-  useEffect(() => {
-    localStorage.setItem("disclosureCredits", disclosureCredits);
-  }, [disclosureCredits]);
-
-  const fetchTableData = async (table: string) => {
-    try {
-      const { data, error } = await supabaseClient.from(table).select("*");
-      if (error) throw error;
-      return { table, data };
-    } catch (err: any) {
-      return { table, error: err.message };
-    }
-  };
-
   const querySupabase = async (table: string, query: string) => {
     const date = new Date().toLocaleString();
-    try {
-      const { data, error } = await supabaseClient.from(table).select(query);
-      if (error) throw error;
-
-      if (!skipEmpty || (data && data.length > 0)) {
-        addQueryResult(
-          `Table: ${table}\nQuery: ${query}\nDate: ${date}\n\n${JSON.stringify(
-            data,
-            null,
-            2
-          )}`,
-          false
-        );
-      }
-      return { table, data };
-    } catch (err: any) {
-      addQueryResult(
-        `Table: ${table}\nQuery: ${query}\nDate: ${date}\n\nFailed to query: ${err.message}`,
-        false
-      );
-      return { table, error: err.message };
-    }
-  };
-
-  const processTablesInChunks = async (
-    tables: string[],
-    processFn: (table: string) => Promise<any>,
-    chunkSize = 5
-  ) => {
-    const summary: any[] = [];
-
-    for (let i = 0; i < tables.length; i += chunkSize) {
-      const chunk = tables.slice(i, i + chunkSize);
-
-      const promises = chunk.map(processFn);
-      const results = await Promise.all(promises);
-
-      // console log the table name and the table data
-      results.forEach((entry) => {
-        if (entry) {
-          console.log(
-            `Table: ${entry.table}:`,
-            entry.data ? entry.data : entry.error
-          );
-        }
-      });
-
-      results.forEach((entry) => {
-        if (entry) {
-          summary.push(entry);
-        }
-      });
-    }
-
-    return summary;
+    const result = await fetchTableData(supabaseClient, table, query);
+    handleResult(result, query, date, addQueryResult, skipEmpty);
+    return result;
   };
 
   const queryAllTables = async () => {
-    const summary = await processTablesInChunks(tables, fetchTableData);
+    const summary = await processTablesInChunks(tables, (table) =>
+      fetchTableData(supabaseClient, table)
+    );
 
-    summary.forEach((entry) => {
-      if (entry.error) {
-        addQueryResult(
-          `Table: ${table}\nQuery: ${entry.query}\nDate: ${entry.date}\n\nFailed to query: ${entry.err.message}`,
-          false
-        );
-      } else {
-        if (!skipEmpty || (entry.data && entry.data.length > 0)) {
-          addQueryResult(
-            `Table: ${table}\nQuery: ${entry.query}\nDate: ${
-              entry.date
-            }\n\n${JSON.stringify(entry.data, null, 2)}`,
-            false
-          );
-        }
-      }
-    });
     const summaryReport = summary
       .map(
         (entry) =>
           `Table: ${entry.table} - ${
-            entry.error ? `Error: ${entry.error}` : `Size: ${entry.data.length}`
+            entry.error
+              ? `Error: ${entry.error}`
+              : `Size: ${entry.data?.length ?? 0}`
           }`
       )
       .join("\n");
@@ -194,7 +121,6 @@ const QuerySection: React.FC<QuerySectionProps> = ({
           <div className="text-center text-gray-500 mt-4">No tables found.</div>
         )}
       </div>
-      {/* Company Name and URL fields */}
       <div className="mt-4 w-full">
         <input
           type="text"
@@ -218,7 +144,6 @@ const QuerySection: React.FC<QuerySectionProps> = ({
           onChange={(e) => setDisclosureCredits(e.target.value)}
         />
       </div>
-      {/* Vulnerability Disclosure Component */}
       <VulnerabilityDisclosure
         supabaseClient={supabaseClient}
         tables={tables}
