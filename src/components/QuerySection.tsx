@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { SupabaseClient } from "@supabase/supabase-js";
+import VulnerabilityDisclosure from "./VulnerabilityDisclosure";
 
 interface QuerySectionProps {
   supabaseClient: SupabaseClient;
@@ -12,13 +13,12 @@ const QuerySection: React.FC<QuerySectionProps> = ({
   addQueryResult,
   tables,
 }) => {
-  const [table, setTable] = useState("");
-  const [skipEmpty, setSkipEmpty] = useState(false);
-  const [companyName, setCompanyName] = useState("");
-  const [companyUrl, setCompanyUrl] = useState("");
-  const [disclosureCredits, setDisclosureCredits] = useState("");
-  const [vulnerabilityReport, setVulnerabilityReport] = useState("");
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [table, setTable] = useState<string>("");
+  const [skipEmpty, setSkipEmpty] = useState<boolean>(false);
+  const [companyName, setCompanyName] = useState<string>("");
+  const [companyUrl, setCompanyUrl] = useState<string>("");
+  const [disclosureCredits, setDisclosureCredits] = useState<string>("");
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   useEffect(() => {
     const savedDisclosureCredits = localStorage.getItem("disclosureCredits");
@@ -32,7 +32,7 @@ const QuerySection: React.FC<QuerySectionProps> = ({
     };
 
     checkAuthStatus();
-  }, []);
+  }, [supabaseClient.auth]);
 
   useEffect(() => {
     localStorage.setItem("disclosureCredits", disclosureCredits);
@@ -42,10 +42,8 @@ const QuerySection: React.FC<QuerySectionProps> = ({
     try {
       const { data, error } = await supabaseClient.from(table).select("*");
       if (error) throw error;
-      console.log(table, data);
       return { table, data };
     } catch (err: any) {
-      console.log(table, err);
       return { table, error: err.message };
     }
   };
@@ -57,8 +55,6 @@ const QuerySection: React.FC<QuerySectionProps> = ({
       if (error) throw error;
 
       if (!skipEmpty || (data && data.length > 0)) {
-        console.log(table, data);
-
         addQueryResult(
           `Table: ${table}\nQuery: ${query}\nDate: ${date}\n\n${JSON.stringify(
             data,
@@ -70,7 +66,6 @@ const QuerySection: React.FC<QuerySectionProps> = ({
       }
       return { table, data };
     } catch (err: any) {
-      console.log(table, err);
       addQueryResult(
         `Table: ${table}\nQuery: ${query}\nDate: ${date}\n\nFailed to query: ${err.message}`,
         false
@@ -125,68 +120,6 @@ const QuerySection: React.FC<QuerySectionProps> = ({
       .join("\n");
 
     addQueryResult(`Summary Report:\n\n${summaryReport}`, true);
-  };
-
-  const generateVulnerabilityReport = async () => {
-    const summary = await processTablesInChunks(tables, fetchTableData);
-
-    const vulnerableTableNameList = summary
-      .filter((entry) => entry.data && entry.data.length > 0)
-      .map((entry) => ({
-        table: entry.table,
-        size: entry.data.length > 1000 ? "1000+" : entry.data.length,
-      }));
-    const vulnerableTables = vulnerableTableNameList
-      .map(
-        (entry) =>
-          `${entry.table} (${
-            entry.size >= 1000 ? "1000+" : entry.size
-          } entries)`
-      )
-      .join(", ");
-
-    let accessLinksText = "";
-    if (!isAuthenticated) {
-      const accessLinks = vulnerableTableNameList.map(
-        (entry) =>
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          //@ts-expect-error
-          `${supabaseClient.supabaseUrl}/rest/v1/${entry.table}?select=*&apikey=${supabaseClient.supabaseKey}`
-      );
-
-      accessLinksText = `Here is an example link using the API:\n${accessLinks
-        .slice(0, 1)
-        .join("\n")}`;
-    }
-
-    const report = `Hello ${companyName} team,
-  
-I wanted to let you know of an important security issue. Specifically, your Supabase database is not properly secured (with row level security or other measures). As a result, an attacker can access data stored in the Supabase instance used at ${companyUrl}.
-
-Supabase instance in question:
-URL: ${
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //@ts-expect-error
-      supabaseClient.supabaseUrl
-    }
-Anon Key: ${
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //@ts-expect-error
-      supabaseClient.supabaseKey
-    }
-
-This affects the following tables:
-${vulnerableTables}
-
-The data is accessible via the API or using the Supabase client as usual (which utilizes the mentioned API).
-${accessLinksText}
-
-Let me know if you need more information or have any further questions.
-
-Best,
-${disclosureCredits}`;
-
-    setVulnerabilityReport(report);
   };
 
   return (
@@ -268,25 +201,17 @@ ${disclosureCredits}`;
           onChange={(e) => setDisclosureCredits(e.target.value)}
         />
       </div>
-      {/* Generate Report button */}
-      <button
-        className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4"
-        onClick={generateVulnerabilityReport}
-      >
-        Generate Report
-      </button>
-      {/* Display vulnerability disclosure report if generated */}
-      {vulnerabilityReport && (
-        <div className="mt-4 w-full bg-gray-100 p-4 rounded">
-          <h4 className="text-lg font-bold">Vulnerability Report:</h4>
-          <pre className="mt-2 whitespace-pre-wrap text-xs">
-            {vulnerabilityReport}
-          </pre>
-        </div>
-      )}
+      {/* Vulnerability Disclosure Component */}
+      <VulnerabilityDisclosure
+        supabaseClient={supabaseClient}
+        tables={tables}
+        isAuthenticated={isAuthenticated}
+        companyName={companyName}
+        companyUrl={companyUrl}
+        disclosureCredits={disclosureCredits}
+      />
     </div>
   );
 };
 
 export default QuerySection;
-``;
