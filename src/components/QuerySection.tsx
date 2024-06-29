@@ -20,34 +20,56 @@ const QuerySection: React.FC<QuerySectionProps> = ({
 }) => {
   const [table, setTable] = useState<string>("");
   const [skipEmpty, setSkipEmpty] = useState<boolean>(false);
+  const [querying, setQuerying] = useState<boolean>(false); // State to track if a query is in progress
 
   const querySupabase = async (table: string, query: string) => {
+    if (querying) {
+      toast.error("Another query is already in progress.");
+      return;
+    }
+    setQuerying(true);
     const date = new Date().toLocaleString();
-    const result = await fetchTableData(supabaseClient, table, query);
-    handleResult(result, query, date, addQueryResult, skipEmpty);
-    return result;
+    try {
+      const result = await fetchTableData(supabaseClient, table, query);
+      handleResult(result, query, date, addQueryResult, skipEmpty);
+    } catch (error) {
+      toast.error(`Error querying table ${table}: ${(error as Error).message}`);
+    } finally {
+      setQuerying(false);
+    }
   };
 
   const queryAllTables = async (query: string) => {
+    if (querying) {
+      toast.error("Another query is already in progress.");
+      return;
+    }
+    setQuerying(true);
     const toastId = toast.loading("Querying all tables...");
     console.log("Querying all tables...");
-    const summary = await processTablesInChunks(tables, (table) =>
-      fetchTableData(supabaseClient, table, query, skipEmpty)
-    );
+    try {
+      const summary = await processTablesInChunks(tables, (table) =>
+        fetchTableData(supabaseClient, table, query, skipEmpty)
+      );
 
-    const summaryReport = summary
-      .map(
-        (entry) =>
-          `Table: ${entry.table} - ${
-            entry.error
-              ? `Error: ${entry.error}`
-              : `Size: ${entry.data?.length ?? 0}`
-          }`
-      )
-      .join("\n");
+      const summaryReport = summary
+        .map(
+          (entry) =>
+            `Table: ${entry.table} - ${
+              entry.error
+                ? `Error: ${entry.error}`
+                : `Size: ${entry.data?.length ?? 0}`
+            }`
+        )
+        .join("\n");
 
-    addQueryResult(`Summary Report:\n\n${summaryReport}`, true);
-    toast.success("Query completed.", { id: toastId });
+      addQueryResult(`Summary Report:\n\n${summaryReport}`, true);
+      toast.success("Query completed.", { id: toastId });
+    } catch (error) {
+      toast.error(`Error querying all tables: ${(error as Error).message}`);
+    } finally {
+      setQuerying(false);
+    }
   };
 
   return (
@@ -66,12 +88,14 @@ const QuerySection: React.FC<QuerySectionProps> = ({
         />
         <div className="flex space-x-4">
           <button
+            disabled={querying} // Disable button if querying is true
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
             onClick={() => querySupabase(table, "*")}
           >
             Query
           </button>
           <button
+            disabled={querying} // Disable button if querying is true
             className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
             onClick={() => queryAllTables("*")}
           >
