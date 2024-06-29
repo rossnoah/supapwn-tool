@@ -170,7 +170,7 @@ ${accessLinksText}
 
 Let me know if you need more information or have any further questions.
 
-Best regards,
+Best,
 ${disclosureCredits}`;
 
     setVulnerabilityReport(report);
