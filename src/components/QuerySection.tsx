@@ -28,6 +28,7 @@ const QuerySection: React.FC<QuerySectionProps> = ({
   };
 
   const queryAllTables = async (query: string) => {
+    console.log("Querying all tables...");
     const summary = await processTablesInChunks(tables, (table) =>
       fetchTableData(supabaseClient, table, query, skipEmpty)
     );
