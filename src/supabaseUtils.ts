@@ -42,7 +42,8 @@ export const handleResult = (
 export const fetchTableData = async (
   supabaseClient: SupabaseClient,
   table: string,
-  query: string = "*"
+  query: string = "*",
+  dontLogEmptyCollections: boolean = false
 ): Promise<QueryResult> => {
   try {
     const { data, error } = await supabaseClient.from(table).select(query);
@@ -51,7 +52,9 @@ export const fetchTableData = async (
       data,
       error: error ? error.message : null,
     };
-    logResult(result);
+    if (!dontLogEmptyCollections || (data && data.length > 0)) {
+      logResult(result);
+    }
     return result;
   } catch (err: any) {
     return { table, data: null, error: err.message };

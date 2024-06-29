@@ -27,9 +27,9 @@ const QuerySection: React.FC<QuerySectionProps> = ({
     return result;
   };
 
-  const queryAllTables = async () => {
+  const queryAllTables = async (query: string) => {
     const summary = await processTablesInChunks(tables, (table) =>
-      fetchTableData(supabaseClient, table)
+      fetchTableData(supabaseClient, table, query, skipEmpty)
     );
 
     const summaryReport = summary
@@ -69,7 +69,7 @@ const QuerySection: React.FC<QuerySectionProps> = ({
           </button>
           <button
             className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-            onClick={queryAllTables}
+            onClick={() => queryAllTables("*")}
           >
             Query All
           </button>
