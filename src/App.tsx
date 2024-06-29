@@ -5,6 +5,7 @@ import QuerySection from "./components/QuerySection";
 import QueryResults, { result } from "./components/QueryResults";
 import AuthSection from "./components/AuthSection";
 import { getPaths } from "./getPaths";
+import { Toaster } from "react-hot-toast";
 
 const App: React.FC = () => {
   const [supabaseClient, setSupabaseClient] = useState<SupabaseClient | null>(
@@ -40,6 +41,7 @@ const App: React.FC = () => {
 
   return (
     <div className="bg-gradient-to-r from-blue-50 to-blue-100 min-h-screen flex flex-col items-center justify-center w-full">
+      <Toaster />
       <ConnectionForm
         setSupabaseClient={setSupabaseClient}
         discoverTables={discoverTables}
