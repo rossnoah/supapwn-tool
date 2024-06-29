@@ -18,7 +18,7 @@ const AuthSection: React.FC<AuthSectionProps> = ({ supabaseClient }) => {
 
     checkUserAuthentication();
   }, []);
-  supabaseClient.auth.onAuthStateChange((event, session) => {
+  supabaseClient.auth.onAuthStateChange((_event, session) => {
     setStatus(session?.user ? "Authenticated" : "Not Authenticated");
   });
 
