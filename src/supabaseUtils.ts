@@ -65,7 +65,7 @@ export const fetchTableData = async (
 export const processTablesInChunks = async (
   tables: string[],
   processFn: (table: string) => Promise<QueryResult>,
-  chunkSize = 5
+  chunkSize = 20
 ): Promise<QueryResult[]> => {
   const summary: QueryResult[] = [];
 
