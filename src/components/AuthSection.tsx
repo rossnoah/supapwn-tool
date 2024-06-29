@@ -23,8 +23,8 @@ const AuthSection: React.FC<AuthSectionProps> = ({
       console.log(response);
       if (response.error) throw response.error;
       setError("");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError((err as Error).message);
     }
   };
 
@@ -34,8 +34,8 @@ const AuthSection: React.FC<AuthSectionProps> = ({
       console.log(response);
       if (response.error) throw response.error;
       setError("");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError((err as Error).message);
     }
   };
 
@@ -65,9 +65,9 @@ const AuthSection: React.FC<AuthSectionProps> = ({
 
       // If either login or registration succeeds
       setError("");
-    } catch (err: any) {
+    } catch (err: unknown) {
       // If both login and registration fail
-      setError(err.message);
+      setError((err as Error).message);
     }
   };
 

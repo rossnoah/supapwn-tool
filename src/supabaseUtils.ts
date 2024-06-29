@@ -3,7 +3,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 // Define the type for the result entries
 interface QueryResult {
   table: string;
-  data: any[] | null;
+  data: unknown[] | null;
   error: string | null;
 }
 
@@ -56,8 +56,9 @@ export const fetchTableData = async (
       logResult(result);
     }
     return result;
-  } catch (err: any) {
-    return { table, data: null, error: err.message };
+  } catch (err: unknown) {
+    const error = err as Error;
+    return { table, data: null, error: error.message };
   }
 };
 

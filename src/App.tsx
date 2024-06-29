@@ -7,13 +7,13 @@ import AuthSection from "./components/AuthSection";
 import { getPaths } from "./getPaths";
 import { Toaster } from "react-hot-toast";
 import VulnerabilityDisclosure from "./components/VulnerabilityDisclosure";
+import Settings from "./components/Settings";
 
 const App: React.FC = () => {
   const [supabaseClient, setSupabaseClient] = useState<SupabaseClient | null>(
     null
   );
 
-  //set supabaseClient to window.supabase
   useEffect(() => {
     if (typeof window !== "undefined") {
       if (supabaseClient) {
@@ -28,6 +28,19 @@ const App: React.FC = () => {
   const [tables, setTables] = useState<string[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
+  const defaultSettings = {
+    showConnectionForm: true,
+    showQuerySection: true,
+    showAuthSection: true,
+    showVulnerabilityDisclosure: true,
+    showQueryResults: true,
+  };
+
+  const [settings, setSettings] = useState(() => {
+    const savedSettings = localStorage.getItem("uiSettings");
+    return savedSettings ? JSON.parse(savedSettings) : defaultSettings;
+  });
+
   useEffect(() => {
     const checkUser = async () => {
       if (supabaseClient) {
@@ -36,6 +49,7 @@ const App: React.FC = () => {
     };
     checkUser();
   }, [supabaseClient]);
+
   const addQueryResult = (data: string, bypassCharLimit?: boolean) => {
     const result: result = {
       data,
@@ -52,6 +66,8 @@ const App: React.FC = () => {
   return (
     <div className="bg-gradient-to-r from-blue-50 to-blue-100 min-h-screen flex flex-col items-center justify-center w-full">
       <Toaster />
+      <Settings settings={settings} setSettings={setSettings} />
+
       <ConnectionForm
         setSupabaseClient={setSupabaseClient}
         discoverTables={discoverTables}
@@ -59,25 +75,33 @@ const App: React.FC = () => {
 
       {supabaseClient ? (
         <div>
-          <div className="flex flex-row items-center justify-center space-x-2 w-full ">
-            <QuerySection
-              supabaseClient={supabaseClient}
-              addQueryResult={addQueryResult}
-              tables={tables}
-            />
-            <AuthSection
-              supabaseClient={supabaseClient}
-              isAuthenticated={isAuthenticated}
-            />
+          <div className="flex flex-row items-center justify-center space-x-2 w-full">
+            {settings.showQuerySection && (
+              <QuerySection
+                supabaseClient={supabaseClient}
+                addQueryResult={addQueryResult}
+                tables={tables}
+              />
+            )}
+            {settings.showAuthSection && (
+              <AuthSection
+                supabaseClient={supabaseClient}
+                isAuthenticated={isAuthenticated}
+              />
+            )}
           </div>
 
-          <div className="flex flex-col items-center justify-center ">
-            <VulnerabilityDisclosure
-              supabaseClient={supabaseClient}
-              tables={tables}
-              isAuthenticated={isAuthenticated}
-            />
-            <QueryResults queryResults={queryResults} />
+          <div className="flex flex-col items-center justify-center">
+            {settings.showVulnerabilityDisclosure && (
+              <VulnerabilityDisclosure
+                supabaseClient={supabaseClient}
+                tables={tables}
+                isAuthenticated={isAuthenticated}
+              />
+            )}
+            {settings.showQueryResults && (
+              <QueryResults queryResults={queryResults} />
+            )}
           </div>
         </div>
       ) : (

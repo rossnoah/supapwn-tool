@@ -41,10 +41,11 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({
       localStorage.setItem("supabaseKey", key);
 
       await discoverTables(url, key); // Discover tables after connecting
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as Error;
       setStatus("Not Connected");
       setStatusColor("text-red-500");
-      setError("Failed to connect: " + err.message);
+      setError("Failed to connect: " + error.message);
     }
   };
 
@@ -58,7 +59,7 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center my-4 space-y-6 bg-white p-8 rounded-lg shadow-lg">
+    <div className="flex flex-col items-center justify-center my-4 space-y-6 bg-white p-8 rounded-lg">
       <h1 className="text-7xl font-black text-center text-blue-600 mt-8">
         SupaPwn
       </h1>
