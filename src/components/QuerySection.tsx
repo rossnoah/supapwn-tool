@@ -148,7 +148,7 @@ const QuerySection: React.FC<QuerySectionProps> = ({
 
     const report = `Hello ${companyName} team,
   
-I wanted to let you know of an important security issue. Specifically, your Supabase database is not properly secured (with row level security or other measures). As a result, an attacker may access data stored in the Supabase instance used at ${companyUrl}.
+I wanted to let you know of an important security issue. Specifically, your Supabase database is not properly secured (with row level security or other measures). As a result, an attacker can access data stored in the Supabase instance used at ${companyUrl}.
 
 Supabase instance in question:
 URL: ${
@@ -171,7 +171,7 @@ ${accessLinksText}
 Let me know if you need more information or have any further questions.
 
 Best regards,
-  ${disclosureCredits}`;
+${disclosureCredits}`;
 
     setVulnerabilityReport(report);
   };
