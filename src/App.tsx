@@ -29,7 +29,7 @@ const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   const defaultSettings = {
-    showConnectionForm: true,
+    showConnectionForm: false,
     showQuerySection: true,
     showAuthSection: true,
     showVulnerabilityDisclosure: true,
@@ -68,10 +68,12 @@ const App: React.FC = () => {
       <Toaster />
       <Settings settings={settings} setSettings={setSettings} />
 
-      <ConnectionForm
-        setSupabaseClient={setSupabaseClient}
-        discoverTables={discoverTables}
-      />
+      {(!supabaseClient || settings.showConnectionForm) && (
+        <ConnectionForm
+          setSupabaseClient={setSupabaseClient}
+          discoverTables={discoverTables}
+        />
+      )}
 
       {supabaseClient ? (
         <div>
