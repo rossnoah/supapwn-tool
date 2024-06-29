@@ -77,7 +77,7 @@ const QuerySection: React.FC<QuerySectionProps> = ({
   const processTablesInChunks = async (
     tables: string[],
     processFn: (table: string) => Promise<any>,
-    chunkSize = 100
+    chunkSize = 5
   ) => {
     const summary: any[] = [];
 
