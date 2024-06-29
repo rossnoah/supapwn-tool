@@ -27,7 +27,7 @@ const QuerySection: React.FC<QuerySectionProps> = ({
       toast.error("Another query is already in progress.");
       return;
     }
-    setQuerying(true);
+    setQuerying(true); // Set querying to true
     const date = new Date().toLocaleString();
     try {
       const result = await fetchTableData(supabaseClient, table, query);
@@ -35,7 +35,7 @@ const QuerySection: React.FC<QuerySectionProps> = ({
     } catch (error) {
       toast.error(`Error querying table ${table}: ${(error as Error).message}`);
     } finally {
-      setQuerying(false);
+      setQuerying(false); // Set querying to false
     }
   };
 
@@ -44,7 +44,7 @@ const QuerySection: React.FC<QuerySectionProps> = ({
       toast.error("Another query is already in progress.");
       return;
     }
-    setQuerying(true);
+    setQuerying(true); // Set querying to true
     console.log("Querying all tables...");
     try {
       const summary = await processTablesInChunks(tables, (table) =>
@@ -66,7 +66,7 @@ const QuerySection: React.FC<QuerySectionProps> = ({
     } catch (error) {
       toast.error(`Error querying all tables: ${(error as Error).message}`);
     } finally {
-      setQuerying(false);
+      setQuerying(false); // Set querying to false
     }
   };
 
@@ -87,17 +87,21 @@ const QuerySection: React.FC<QuerySectionProps> = ({
         <div className="flex space-x-4">
           <button
             disabled={querying} // Disable button if querying is true
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${
+              querying ? "opacity-50 cursor-not-allowed" : ""
+            }`}
             onClick={() => querySupabase(table, "*")}
           >
-            Query
+            {querying ? "Querying..." : "Query"}
           </button>
           <button
             disabled={querying} // Disable button if querying is true
-            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+            className={`bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ${
+              querying ? "opacity-50 cursor-not-allowed" : ""
+            }`}
             onClick={() => queryAllTables("*")}
           >
-            Query All
+            {querying ? "Querying..." : "Query All"}
           </button>
         </div>
         <div className="flex items-center space-x-2 mt-4">
