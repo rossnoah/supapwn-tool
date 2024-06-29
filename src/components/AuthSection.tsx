@@ -1,26 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 interface AuthSectionProps {
   supabaseClient: SupabaseClient;
+  isAuthenticated: boolean;
 }
 
-const AuthSection: React.FC<AuthSectionProps> = ({ supabaseClient }) => {
+const AuthSection: React.FC<AuthSectionProps> = ({
+  supabaseClient,
+  isAuthenticated,
+}) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [status, setStatus] = useState("Not Authenticated");
-  useEffect(() => {
-    const checkUserAuthentication = async () => {
-      const user = await supabaseClient.auth.getUser();
-      setStatus(user.data.user ? "Authenticated" : "Not Authenticated");
-    };
-
-    checkUserAuthentication();
-  }, []);
-  supabaseClient.auth.onAuthStateChange((_event, session) => {
-    setStatus(session?.user ? "Authenticated" : "Not Authenticated");
-  });
 
   const handleLogin = async () => {
     try {
@@ -30,11 +22,9 @@ const AuthSection: React.FC<AuthSectionProps> = ({ supabaseClient }) => {
       });
       console.log(response);
       if (response.error) throw response.error;
-      setStatus("Authenticated");
       setError("");
     } catch (err: any) {
       setError(err.message);
-      setStatus("Not Authenticated");
     }
   };
 
@@ -43,11 +33,9 @@ const AuthSection: React.FC<AuthSectionProps> = ({ supabaseClient }) => {
       const response = await supabaseClient.auth.signUp({ email, password });
       console.log(response);
       if (response.error) throw response.error;
-      setStatus("Authenticated");
       setError("");
     } catch (err: any) {
       setError(err.message);
-      setStatus("Not Authenticated");
     }
   };
 
@@ -76,12 +64,10 @@ const AuthSection: React.FC<AuthSectionProps> = ({ supabaseClient }) => {
       }
 
       // If either login or registration succeeds
-      setStatus("Authenticated");
       setError("");
     } catch (err: any) {
       // If both login and registration fail
       setError(err.message);
-      setStatus("Not Authenticated");
     }
   };
 
@@ -152,10 +138,10 @@ const AuthSection: React.FC<AuthSectionProps> = ({ supabaseClient }) => {
         Status:{" "}
         <span
           className={`font-bold ${
-            status === "Authenticated" ? "text-green-500" : "text-red-500"
+            isAuthenticated ? "text-green-500" : "text-red-500"
           }`}
         >
-          {status}
+          {isAuthenticated ? "Authenticated" : "Not Authenticated"}
         </span>
       </p>
       {error && <p className="text-red-500 text-sm mt-2">{error}</p>}

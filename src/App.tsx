@@ -6,6 +6,7 @@ import QueryResults, { result } from "./components/QueryResults";
 import AuthSection from "./components/AuthSection";
 import { getPaths } from "./getPaths";
 import { Toaster } from "react-hot-toast";
+import VulnerabilityDisclosure from "./components/VulnerabilityDisclosure";
 
 const App: React.FC = () => {
   const [supabaseClient, setSupabaseClient] = useState<SupabaseClient | null>(
@@ -25,7 +26,16 @@ const App: React.FC = () => {
 
   const [queryResults, setQueryResults] = useState<result[]>([]);
   const [tables, setTables] = useState<string[]>([]);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
+  useEffect(() => {
+    const checkUser = async () => {
+      if (supabaseClient) {
+        setIsAuthenticated(!!(await supabaseClient.auth.getUser()).data.user);
+      }
+    };
+    checkUser();
+  }, [supabaseClient]);
   const addQueryResult = (data: string, bypassCharLimit?: boolean) => {
     const result: result = {
       data,
@@ -48,16 +58,27 @@ const App: React.FC = () => {
       />
 
       {supabaseClient ? (
-        <div className="flex flex-col items-center justify-center w-full">
+        <div>
           <div className="flex flex-row items-center justify-center space-x-2 w-full ">
             <QuerySection
               supabaseClient={supabaseClient}
               addQueryResult={addQueryResult}
               tables={tables}
             />
-            <AuthSection supabaseClient={supabaseClient} />
+            <AuthSection
+              supabaseClient={supabaseClient}
+              isAuthenticated={isAuthenticated}
+            />
           </div>
-          <QueryResults queryResults={queryResults} />
+
+          <div className="flex flex-col items-center justify-center ">
+            <VulnerabilityDisclosure
+              supabaseClient={supabaseClient}
+              tables={tables}
+              isAuthenticated={isAuthenticated}
+            />
+            <QueryResults queryResults={queryResults} />
+          </div>
         </div>
       ) : (
         <div className="py-12 text-center w-2/5 bg-white rounded-xl">
