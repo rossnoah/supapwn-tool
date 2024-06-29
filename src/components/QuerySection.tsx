@@ -104,6 +104,17 @@ const QuerySection: React.FC<QuerySectionProps> = ({
   const queryAllTables = async () => {
     const summary = await processTablesInChunks(tables, fetchTableData);
 
+    summary.forEach((entry) => {
+      console.log(entry.table, entry.data);
+      if (entry.error) {
+        addQueryResult(`Table: ${entry.table} - ${entry.error}`, false);
+      } else {
+        addQueryResult(
+          `Table: ${entry.table} - Size: ${entry.data.length}`,
+          false
+        );
+      }
+    });
     const summaryReport = summary
       .map(
         (entry) =>
