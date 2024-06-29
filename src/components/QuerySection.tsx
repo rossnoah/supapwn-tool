@@ -45,7 +45,6 @@ const QuerySection: React.FC<QuerySectionProps> = ({
       return;
     }
     setQuerying(true);
-    const toastId = toast.loading("Querying all tables...");
     console.log("Querying all tables...");
     try {
       const summary = await processTablesInChunks(tables, (table) =>
@@ -64,7 +63,6 @@ const QuerySection: React.FC<QuerySectionProps> = ({
         .join("\n");
 
       addQueryResult(`Summary Report:\n\n${summaryReport}`, true);
-      toast.success("Query completed.", { id: toastId });
     } catch (error) {
       toast.error(`Error querying all tables: ${(error as Error).message}`);
     } finally {
