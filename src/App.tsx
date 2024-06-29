@@ -48,6 +48,10 @@ const App: React.FC = () => {
       }
     };
     checkUser();
+    supabaseClient?.auth.onAuthStateChange((event, session) => {
+      if (session?.user.id) setIsAuthenticated(true);
+      else setIsAuthenticated(false);
+    });
   }, [supabaseClient]);
 
   const addQueryResult = (data: string, bypassCharLimit?: boolean) => {
