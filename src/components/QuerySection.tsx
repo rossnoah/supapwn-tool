@@ -27,7 +27,7 @@ const QuerySection: React.FC<QuerySectionProps> = ({
     }
 
     const checkAuthStatus = async () => {
-      const user = supabaseClient.auth.user();
+      const user = (await supabaseClient.auth.getUser()).data.user;
       setIsAuthenticated(!!user);
     };
 
