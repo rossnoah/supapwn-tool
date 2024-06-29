@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 interface AuthSectionProps {
@@ -10,6 +10,17 @@ const AuthSection: React.FC<AuthSectionProps> = ({ supabaseClient }) => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [status, setStatus] = useState("Not Authenticated");
+  useEffect(() => {
+    const checkUserAuthentication = async () => {
+      const user = await supabaseClient.auth.getUser();
+      setStatus(user.data.user ? "Authenticated" : "Not Authenticated");
+    };
+
+    checkUserAuthentication();
+  }, []);
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    setStatus(session?.user ? "Authenticated" : "Not Authenticated");
+  });
 
   const handleLogin = async () => {
     try {
@@ -41,8 +52,8 @@ const AuthSection: React.FC<AuthSectionProps> = ({ supabaseClient }) => {
   };
 
   const handleAutoLoginOrRegister = async () => {
-    const autoEmail = "test@test.com";
-    const autoPassword = "testtest";
+    const autoEmail = "95t3wg29ce992b014zvf@test.com"; //this is just inteanded to be an email that is not already in use.
+    const autoPassword = ">}7H96t]E9[V1£t.%).x"; //this is not inteaded to be secure. It is just inteanded to be random and pass password requirements.
 
     try {
       // Try logging in first
@@ -91,7 +102,7 @@ const AuthSection: React.FC<AuthSectionProps> = ({ supabaseClient }) => {
         onChange={(e) => setPassword(e.target.value)}
         className="w-full p-2 border border-gray-300 rounded"
       />
-      <div className="flex space-x-4">
+      <div className="flex flex-wrap justify-center gap-4">
         <button
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           onClick={handleLogin}
@@ -109,6 +120,32 @@ const AuthSection: React.FC<AuthSectionProps> = ({ supabaseClient }) => {
           onClick={handleAutoLoginOrRegister}
         >
           Auto Register
+        </button>
+        <button
+          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+          onClick={() => {
+            supabaseClient.auth.signOut();
+            //delete everything from local storage that starts with sb-
+            Object.keys(localStorage).forEach((key) => {
+              if (key.startsWith("sb-")) {
+                localStorage.removeItem(key);
+              }
+            });
+            console.log("Signed out");
+          }}
+        >
+          Sign out
+        </button>
+        <button
+          className="bg-slate-500 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded"
+          onClick={async () => {
+            console.log(
+              "User:",
+              (await supabaseClient.auth.getUser()).data.user
+            );
+          }}
+        >
+          Print User
         </button>
       </div>
       <p className="text-sm mt-2">
