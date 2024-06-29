@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 interface ConnectionFormProps {
@@ -36,11 +36,24 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({
       setError("");
       setShowForm(false);
 
+      // Save connection details to local storage
+      localStorage.setItem("supabaseUrl", url);
+      localStorage.setItem("supabaseKey", key);
+
       await discoverTables(url, key); // Discover tables after connecting
     } catch (err: any) {
       setStatus("Not Connected");
       setStatusColor("text-red-500");
       setError("Failed to connect: " + err.message);
+    }
+  };
+
+  const fillCachedConnection = () => {
+    const cachedUrl = localStorage.getItem("supabaseUrl");
+    const cachedKey = localStorage.getItem("supabaseKey");
+    if (cachedUrl && cachedKey) {
+      setUrl(cachedUrl);
+      setKey(cachedKey);
     }
   };
 
@@ -78,6 +91,12 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({
               onClick={() => createSupabaseClient(url, key)}
             >
               Connect
+            </button>
+            <button
+              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ml-2"
+              onClick={fillCachedConnection}
+            >
+              Fill Cached
             </button>
             <span id="status" className={`ml-4 ${statusColor}`}>
               {status}
