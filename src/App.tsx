@@ -48,7 +48,7 @@ const App: React.FC = () => {
       }
     };
     checkUser();
-    supabaseClient?.auth.onAuthStateChange((event, session) => {
+    supabaseClient?.auth.onAuthStateChange((_event, session) => {
       if (session?.user.id) setIsAuthenticated(true);
       else setIsAuthenticated(false);
     });
