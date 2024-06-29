@@ -8,7 +8,7 @@ export async function getPaths(url: string, key: string): Promise<string[]> {
       tables.push(key);
     }
     console.log(tables);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.log(err);
   }
   if (tables.length === 0) {
