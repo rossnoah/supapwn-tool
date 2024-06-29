@@ -42,6 +42,7 @@ const QuerySection: React.FC<QuerySectionProps> = ({
     try {
       const { data, error } = await supabaseClient.from(table).select("*");
       if (error) throw error;
+      console.log(table, data);
       return { table, data };
     } catch (err: any) {
       console.log(table, err);
@@ -105,7 +106,6 @@ const QuerySection: React.FC<QuerySectionProps> = ({
     const summary = await processTablesInChunks(tables, fetchTableData);
 
     summary.forEach((entry) => {
-      console.log(entry.table, entry.data);
       if (entry.error) {
         addQueryResult(`Table: ${entry.table} - ${entry.error}`, false);
       } else {
