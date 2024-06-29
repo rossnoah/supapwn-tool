@@ -87,6 +87,16 @@ const QuerySection: React.FC<QuerySectionProps> = ({
       const promises = chunk.map(processFn);
       const results = await Promise.all(promises);
 
+      // console log the table name and the table data
+      results.forEach((entry) => {
+        if (entry) {
+          console.log(
+            `Table: ${entry.table}:`,
+            entry.data ? entry.data : entry.error
+          );
+        }
+      });
+
       results.forEach((entry) => {
         if (entry) {
           summary.push(entry);
@@ -102,12 +112,19 @@ const QuerySection: React.FC<QuerySectionProps> = ({
 
     summary.forEach((entry) => {
       if (entry.error) {
-        addQueryResult(`Table: ${entry.table} - ${entry.error}`, false);
-      } else {
         addQueryResult(
-          `Table: ${entry.table} - Size: ${entry.data.length}`,
+          `Table: ${table}\nQuery: ${entry.query}\nDate: ${entry.date}\n\nFailed to query: ${entry.err.message}`,
           false
         );
+      } else {
+        if (!skipEmpty || (entry.data && entry.data.length > 0)) {
+          addQueryResult(
+            `Table: ${table}\nQuery: ${entry.query}\nDate: ${
+              entry.date
+            }\n\n${JSON.stringify(entry.data, null, 2)}`,
+            false
+          );
+        }
       }
     });
     const summaryReport = summary
