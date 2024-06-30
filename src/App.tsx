@@ -83,7 +83,7 @@ const App: React.FC = () => {
 
       {supabaseClient ? (
         <div>
-          <div className="flex flex-row items-start justify-center space-x-2 w-full">
+          <div className="flex flex-row items-center justify-center space-x-2 w-full">
             {settings.showQuerySection && (
               <QuerySection
                 supabaseClient={supabaseClient}
@@ -91,14 +91,12 @@ const App: React.FC = () => {
                 tables={tables}
               />
             )}
-            <div className="sticky top-2">
-              {settings.showAuthSection && (
-                <AuthSection
-                  supabaseClient={supabaseClient}
-                  isAuthenticated={isAuthenticated}
-                />
-              )}
-            </div>
+            {settings.showAuthSection && (
+              <AuthSection
+                supabaseClient={supabaseClient}
+                isAuthenticated={isAuthenticated}
+              />
+            )}
           </div>
 
           <div className="flex flex-col items-center justify-center">

@@ -72,7 +72,7 @@ const AuthSection: React.FC<AuthSectionProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-6 bg-white p-8 rounded-lg shadow-lg">
+    <div className="flex flex-col items-center justify-center my-4 space-y-6 bg-white p-8 rounded-lg shadow-lg">
       <h3 className="text-lg text-center text-gray-700">Authenticate</h3>
       <input
         type="email"
