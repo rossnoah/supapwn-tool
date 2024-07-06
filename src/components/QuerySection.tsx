@@ -11,12 +11,14 @@ interface QuerySectionProps {
   supabaseClient: SupabaseClient;
   addQueryResult: (data: string, bypassCharLimit?: boolean) => void;
   tables: string[];
+  addKeys: (inputString: string) => void;
 }
 
 const QuerySection: React.FC<QuerySectionProps> = ({
   supabaseClient,
   addQueryResult,
   tables,
+  addKeys,
 }) => {
   const [table, setTable] = useState<string>("");
   const [skipEmpty, setSkipEmpty] = useState<boolean>(false);
@@ -31,6 +33,9 @@ const QuerySection: React.FC<QuerySectionProps> = ({
     const date = new Date().toLocaleString();
     try {
       const result = await fetchTableData(supabaseClient, table, query);
+      if (result.data) {
+        addKeys(JSON.stringify(result.data));
+      }
       handleResult(result, query, date, addQueryResult, skipEmpty);
     } catch (error) {
       toast.error(`Error querying table ${table}: ${(error as Error).message}`);
@@ -51,6 +56,12 @@ const QuerySection: React.FC<QuerySectionProps> = ({
         fetchTableData(supabaseClient, table, query, skipEmpty)
       );
 
+      // run addKeys on all data as string
+      summary.forEach((entry) => {
+        if (entry.data) {
+          addKeys(JSON.stringify(entry.data));
+        }
+      });
       const summaryReport = summary
         .map(
           (entry) =>

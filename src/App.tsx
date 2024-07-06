@@ -8,6 +8,7 @@ import { getPaths } from "./getPaths";
 import toast, { Toaster } from "react-hot-toast";
 import VulnerabilityDisclosure from "./components/VulnerabilityDisclosure";
 import Settings from "./components/Settings";
+import ExposedKeys from "./components/ExposedKeys";
 
 const App: React.FC = () => {
   const [supabaseClient, setSupabaseClient] = useState<SupabaseClient | null>(
@@ -34,12 +35,34 @@ const App: React.FC = () => {
     showAuthSection: true,
     showVulnerabilityDisclosure: true,
     showQueryResults: true,
+    showExposedKeys: true,
   };
 
   const [settings, setSettings] = useState(() => {
     const savedSettings = localStorage.getItem("uiSettings");
     return savedSettings ? JSON.parse(savedSettings) : defaultSettings;
   });
+
+  const [exposedOpenAIKeys, setExposedOpenAIKeys] = useState<Set<string>>(
+    new Set()
+  );
+
+  const addKeys = (inputString: string) => {
+    // Regular expression to match OpenAI API keys (example: 'sk-xxx')
+    const keyPattern = /sk-[A-Za-z0-9]{48}/g;
+
+    // Find all matches in the input string
+    const matches = inputString.match(keyPattern);
+
+    // Add all found keys to the state
+    if (matches) {
+      setExposedOpenAIKeys((prevSet) => {
+        const newSet = new Set(prevSet);
+        matches.forEach((key) => newSet.add(key));
+        return newSet;
+      });
+    }
+  };
 
   useEffect(() => {
     const checkUser = async () => {
@@ -89,6 +112,7 @@ const App: React.FC = () => {
                 supabaseClient={supabaseClient}
                 addQueryResult={addQueryResult}
                 tables={tables}
+                addKeys={addKeys}
               />
             )}
             {settings.showAuthSection && (
@@ -109,6 +133,9 @@ const App: React.FC = () => {
             )}
             {settings.showQueryResults && (
               <QueryResults queryResults={queryResults} />
+            )}
+            {settings.showExposedKeys && (
+              <ExposedKeys keys={[...exposedOpenAIKeys]} />
             )}
           </div>
         </div>

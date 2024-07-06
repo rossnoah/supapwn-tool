@@ -7,6 +7,7 @@ type SettingsProps = {
     showAuthSection: boolean;
     showVulnerabilityDisclosure: boolean;
     showQueryResults: boolean;
+    showExposedKeys: boolean;
   };
   setSettings: React.Dispatch<
     React.SetStateAction<{
@@ -15,6 +16,7 @@ type SettingsProps = {
       showAuthSection: boolean;
       showVulnerabilityDisclosure: boolean;
       showQueryResults: boolean;
+      showExposedKeys: boolean;
     }>
   >;
 };
@@ -74,6 +76,16 @@ const Settings: React.FC<SettingsProps> = ({ settings, setSettings }) => {
             onChange={() => handleCheckboxChange("showQueryResults")}
           />
           <span>Show Query Results</span>
+        </label>
+        <label className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            className="w-6 h-6"
+            checked={settings.showExposedKeys}
+            onChange={() => handleCheckboxChange("showExposedKeys")}
+          />
+
+          <span>Show Exposed API Keys</span>
         </label>
       </div>
     </div>
