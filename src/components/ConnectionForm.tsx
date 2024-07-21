@@ -20,6 +20,13 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({
   const [key, setKey] = useState("");
 
   const createSupabaseClient = async (url: string, key: string) => {
+    if (!url) {
+      const bodyString = key.split(".")[1];
+      const b64decoded = atob(bodyString);
+      const jsonbody = JSON.parse(b64decoded);
+      url = "https://" + jsonbody.ref + ".supabase.co";
+      console.log("Auto-detected URL: " + url);
+    }
     try {
       const client = createClient(url, key);
       const { data, error } = await client.from("test").select("*");
