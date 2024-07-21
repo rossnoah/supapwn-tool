@@ -49,7 +49,7 @@ export const fetchTableData = async (
     const { data, error } = await supabaseClient
       .from(table)
       .select(query)
-      .limit(10000);
+      .limit(100);
     const result: QueryResult = {
       table,
       data,
