@@ -46,7 +46,10 @@ export const fetchTableData = async (
   dontLogEmptyCollections: boolean = false
 ): Promise<QueryResult> => {
   try {
-    const { data, error } = await supabaseClient.from(table).select(query);
+    const { data, error } = await supabaseClient
+      .from(table)
+      .select(query)
+      .limit(10000);
     const result: QueryResult = {
       table,
       data,
