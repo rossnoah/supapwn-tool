@@ -81,7 +81,7 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({
         >
           <input
             type="text"
-            placeholder="Url"
+            placeholder="Url (Optional as the key contains the URL)"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             className="w-full p-2 border border-gray-300 rounded"
