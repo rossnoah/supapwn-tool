@@ -11,6 +11,14 @@ export const logResult = (entry: QueryResult): void => {
   console.log(`Table: ${entry.table}:`, entry.data ? entry.data : entry.error);
 };
 
+declare global {
+  interface Window {
+    limit: number;
+  }
+}
+
+window.limit = 100;
+
 export const handleResult = (
   entry: QueryResult,
   query: string,
@@ -49,7 +57,7 @@ export const fetchTableData = async (
     const { data, error } = await supabaseClient
       .from(table)
       .select(query)
-      .limit(100);
+      .limit(window.limit);
     const result: QueryResult = {
       table,
       data,
