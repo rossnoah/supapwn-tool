@@ -16,10 +16,103 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({
   const [statusColor, setStatusColor] = useState("text-red-500");
   const [error, setError] = useState("");
   const [showForm, setShowForm] = useState(true);
+  const [pageURL, setPageURL] = useState("");
   const [url, setUrl] = useState("");
   const [key, setKey] = useState("");
 
-  const createSupabaseClient = async (url: string, key: string) => {
+  const createSupabaseClient = async (
+    url: string,
+    key: string,
+    pageURL: string
+  ) => {
+    if (!url && !key && pageURL) {
+      // Parse pageURL to get hostname
+
+      if (!(pageURL.startsWith("http://") || pageURL.startsWith("https://"))) {
+        pageURL = "https://" + pageURL;
+      }
+      const parsedUrl = new URL(pageURL);
+      const hostName = parsedUrl.hostname;
+
+      const corsProxy = "https://corsproxy.io/?url=";
+
+      let bigString = "";
+      let success = false;
+
+      try {
+        // Fetch the main page through the CORS proxy
+        const response = await fetch(
+          corsProxy.includes("allorigins")
+            ? `${corsProxy}${encodeURIComponent(pageURL)}`
+            : `${corsProxy}${pageURL}`
+        );
+
+        // Handle AllOrigins-specific structure
+        const html = corsProxy.includes("allorigins")
+          ? (await response.json()).contents
+          : await response.text();
+
+        bigString += html;
+
+        // Extract all script tag sources
+        const scriptTags = html.match(/<script.*?src="(.*?)".*?>/g);
+        console.log("Script tags found:", scriptTags);
+
+        if (scriptTags) {
+          for (const scriptTag of scriptTags) {
+            try {
+              const scriptSrc = scriptTag.match(/src="(.*?)"/)?.[1];
+
+              if (scriptSrc) {
+                // Resolve relative URLs to absolute URLs
+                const absoluteScriptSrc = new URL(
+                  scriptSrc,
+                  `https://${hostName}`
+                ).href;
+
+                // Fetch the script content through the CORS proxy
+                const scriptResponse = await fetch(
+                  corsProxy.includes("allorigins")
+                    ? `${corsProxy}${encodeURIComponent(absoluteScriptSrc)}`
+                    : `${corsProxy}${absoluteScriptSrc}`
+                );
+
+                const scriptHtml = corsProxy.includes("allorigins")
+                  ? (await scriptResponse.json()).contents
+                  : await scriptResponse.text();
+
+                bigString += scriptHtml;
+              }
+            } catch (err) {
+              console.error("scriptTag error:", scriptTag, err);
+            }
+          }
+        }
+
+        console.log("Collected page content and scripts:", bigString);
+
+        // Extract Supabase key
+        const supabaseKeyRegex =
+          /eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[A-Za-z0-9+/=]*\.[A-Za-z0-9-_]+/;
+        const supabaseKey = bigString.match(supabaseKeyRegex);
+
+        if (supabaseKey) {
+          key = supabaseKey[0]; // Use the first match as the key
+          console.log("Auto-detected Supabase key:", key);
+          success = true;
+        } else {
+          throw new Error("Supabase key not found in the fetched content.");
+        }
+      } catch (err) {
+        console.error(`Failed with proxy: ${corsProxy}`, err);
+      }
+
+      if (!success) {
+        console.error("CORS proxies failed or no Supabase key was found.");
+        return;
+      }
+    }
+
     if (!url) {
       const bodyString = key.split(".")[1];
       const b64decoded = atob(bodyString);
@@ -81,6 +174,13 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({
         >
           <input
             type="text"
+            placeholder="Page URL (Use this or the other manual fields)"
+            value={pageURL}
+            onChange={(e) => setPageURL(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded"
+          />
+          <input
+            type="text"
             placeholder="Url (Optional as the key contains the URL)"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
@@ -96,7 +196,7 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({
           <div className="flex items-center justify-between w-full">
             <button
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-              onClick={() => createSupabaseClient(url, key)}
+              onClick={() => createSupabaseClient(url, key, pageURL)}
             >
               Connect
             </button>
