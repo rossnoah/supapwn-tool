@@ -172,13 +172,13 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({
           id="connection-form"
           className="flex flex-col items-center justify-center bg-gray-100 p-4 rounded-lg space-y-4 w-96"
         >
-          <input
+          {/* <input
             type="text"
             placeholder="Page URL (Use this or the other manual fields)"
             value={pageURL}
             onChange={(e) => setPageURL(e.target.value)}
             className="w-full p-2 border border-gray-300 rounded"
-          />
+          /> */}
           <input
             type="text"
             placeholder="Url (Optional as the key contains the URL)"
