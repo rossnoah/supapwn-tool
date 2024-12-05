@@ -93,7 +93,7 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({
 
         // Extract Supabase key
         const supabaseKeyRegex =
-          /eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[A-Za-z0-9+/=]*\.[A-Za-z0-9-_]+/;
+          /eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI[A-Za-z0-9+/=]*\.[A-Za-z0-9-_]+/;
         const supabaseKey = bigString.match(supabaseKeyRegex);
 
         if (supabaseKey) {
